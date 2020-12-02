@@ -22,6 +22,11 @@
               :pagination="{ doubleArrows: false, align: 'center'}"
               @page-change="pageChange"
           >
+            <template #visible="data">
+              <td>
+                {{ data.item.visible ? 'Видимо' : 'Не видимо' }}
+              </td>
+            </template>
             <template #price="data">
               <td>
                   {{ data.item.price.uah }} грн.
@@ -46,7 +51,8 @@ export default {
       fields: [
         {key: 'name', label: 'Название товара', _classes: 'font-weight-bold'},
         {key: 'price', label: 'Цена'},
-        {key: 'popularity', label: 'Популярность товара'},
+        {key: 'visible', label: 'Видимость'},
+        {key: 'popularity', label: 'Колл. покупок'},
       ],
       activePage: 1
     }

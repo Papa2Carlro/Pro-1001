@@ -2,16 +2,26 @@
   <CCol xs="12" lg="12">
     <CCard>
       <CCardHeader>
-        Создать Продукт
+        Редактировать Товар
       </CCardHeader>
       <CCardBody>
         <CAlert v-if="alert.visible" :color="alert.type">
           {{ alert.msg }}
         </CAlert>
 
+        <CRow v-if="!visible" class="my-3 justify-content-between">
+          <CCol sm="8">
+            <h4>Этот продукт сейчас не отображается в катаготе товаров на сайте</h4>
+          </CCol>
+
+          <CCol sm="2">
+            <CButton @click="disableProductHandler(true)" size="md" class="ml-2" color="info">Открыть видимость</CButton>
+          </CCol>
+        </CRow>
+
         <CForm @submit="editProductHandler">
           <CTabs>
-            <CTab title="Основная информация" active>
+            <CTab title="Основная информация" >
               <CInput
                   type="text"
                   v-model="name"
@@ -28,6 +38,7 @@
                       v-model="price.uah"
                       class="mt-2"
                       min="1"
+                      step="0.01"
                       append="₴"
                       label="Цена продукта UAH"
                       placeholder="Введите цену..."
@@ -41,6 +52,7 @@
                       v-model="price.usd"
                       class="mt-2"
                       min="1"
+                      step="0.01"
                       append="$"
                       label="Цена продукта USD"
                       placeholder="Введите цену..."
@@ -54,6 +66,7 @@
                       v-model="newPrice.uah"
                       class="mt-2"
                       min="1"
+                      step="0.01"
                       append="₴"
                       label="Цена по скидке UAH"
                       placeholder="Введите цену..."
@@ -66,6 +79,7 @@
                       v-model="newPrice.usd"
                       class="mt-2"
                       min="1"
+                      step="0.01"
                       append="$"
                       label="Цена по скидке USD"
                       placeholder="Введите цену..."
@@ -349,12 +363,102 @@
                 </CCol>
               </CRow>
             </CTab>
+
+            <CTab title="Описание">
+              <CRow>
+                <CCol xs="12" md="12">
+
+                  <p class="mt-3"><strong>Описание продукта</strong></p>
+
+                  <CTabs class="mt-3" :vertical="vertical">
+                    <CTab active>
+                      <template slot="title">
+                        <CIcon :width="30" :content="$options.ru"/>
+                      </template>
+
+                      <ckeditor :editor="editor" v-model="editorData.ru"></ckeditor>
+                    </CTab>
+
+                    <CTab>
+                      <template slot="title">
+                        <CIcon :width="30" :content="$options.en"/>
+                      </template>
+
+                      <ckeditor :editor="editor" v-model="editorData.en"></ckeditor>
+                    </CTab>
+                  </CTabs>
+
+                </CCol>
+
+                <CCol xs="12" md="6">
+
+                  <p class="mt-3"><strong>Изображение</strong></p>
+
+                  <CImg
+                      v-if="descriptionPhoto"
+                      :src="getUrl(descriptionPhoto)"
+                      block
+                      fluid
+                      class="mb-2"
+                  />
+
+                  <CRow>
+                    <CCol xs="12" :md="descriptionPhoto ? 9 : 12">
+                      <CInputFile
+                          class="w-100"
+                          custom
+                          horizontal
+                          @change="uploadDescriptionPhotoHandler"
+                      />
+                    </CCol>
+
+                    <CCol v-if="descriptionPhoto" md="3">
+                      <CButton @click="descriptionPhoto = ''" class="mb-3 w-100" size="md" color="danger">Удалить</CButton>
+                    </CCol>
+                  </CRow>
+                </CCol>
+              </CRow>
+            </CTab>
+
+            <CTab title="Комментарии" active>
+              <CDataTable
+                  :items="comments"
+                  :fields="fields"
+                  :items-per-page="10"
+                  hover
+                  table-filter
+                  items-per-page-select
+                  sorter
+                  pagination
+              >
+                <template #author="{item}">
+                  <td class="py-2">
+                    <router-link :to="`/users/${item.author._id}`">
+                      {{ item.author.name }}
+                    </router-link>
+                  </td>
+                </template>
+                <template #delete="{item}">
+                  <td class="py-2">
+                    <CButton
+                        color="danger"
+                        square
+                        size="sm"
+                        @click="deleteComment(item._id)"
+                    >
+                      Удалить
+                    </CButton>
+                  </td>
+                </template>
+              </CDataTable>
+            </CTab>
           </CTabs>
 
           <CRow>
             <CCol class="btn mt-3">
               <CButton type="submit" size="md" color="success">Сохранить</CButton>
               <CButton @click="removeProductHandler" size="md" class="ml-2" color="danger">Удалить</CButton>
+              <CButton v-if="visible" @click="disableProductHandler(false)" size="md" class="ml-2" color="info">Спратать</CButton>
               <CButton @click="$router.go(-1)" size="md" class="ml-4" color="dark">Отменить</CButton>
             </CCol>
           </CRow>
@@ -367,10 +471,33 @@
 <script>
 import axios from "@/plugin/axios"
 import config from "@/config/config"
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic"
+import flag from '@/mixins/flag.mixin'
+
+const fields = [
+  {key: 'author', label: 'Пользователь', _classes: 'font-weight-bold'},
+  {key: 'rate', label: 'Оценка', _classes: 'font-weight-bold'},
+  {key: 'body', label: 'Коментарий', _style: 'min-width: 400px', _classes: 'font-weight-bold'},
+  {
+    key: 'delete',
+    label: '',
+    _style: 'width:1%',
+    sorter: false,
+    filter: false
+  }
+]
 
 export default {
   name: 'EditPost',
+  mixins: [flag],
   data: () => ({
+    vertical: {navs: 'col-md-1', content: 'col-md-11'},
+    editor: ClassicEditor,
+    editorData: {},
+
+    fields,
+    details: [],
+    collapseDuration: 0,
 
     name: '',
     amount: undefined,
@@ -396,8 +523,11 @@ export default {
     harvestFilter: '',
     exclusive: undefined,
     heightFilter: '',
+    visible: undefined,
+    comments: [],
 
     mainPhoto: '',
+    descriptionPhoto: '',
 
     images: [],
 
@@ -486,9 +616,13 @@ export default {
             const dataGeneral = data.general
 
             this.name = data.name
+            this.id = data._id
+            this.visible = data.visible
             this.amount = data.amount
             this.price = data.price
             this.newPrice = data.newPrice
+
+            data.comments.map((item, index) => this.comments.push({...item, id: index}))
 
             // General
             this.manufacturer = dataGeneral.manufacturer
@@ -509,6 +643,9 @@ export default {
             this.height = dataGeneral.height
             this.harvestFilter = dataGeneral.harvest.filter
 
+            this.editorData = data.description.html
+            this.descriptionPhoto = data.description.image
+
             this.mainPhoto = data.pictures[0]
             data.pictures.map((photo, index) => {
               if (index !== 0) {
@@ -524,6 +661,27 @@ export default {
         })
   },
   methods: {
+    disableProductHandler (bool) {
+      const data = JSON.parse(localStorage.getItem('login'))
+
+      axios({
+        method: 'PATCH',
+        url: `api/products/${this.$route.params.id}`,
+        headers: {
+          Authorization: data.token
+        },
+        data: {visible: bool}
+      })
+          .then(res => {
+            if(res.data.ok) {
+              this.visible = bool
+            }
+          })
+          .catch(err => {
+            this.alertHandler('Произошла неизвестная ошибка, проверте консоль, Нажмите F12', true)
+            console.log(err)
+          })
+    },
     async uploadMainPhotoHandler(event) {
       let formData = new FormData();
       formData.append('image', event[0]);
@@ -644,6 +802,10 @@ export default {
             filter: this.filterHeight()
           },
           exclusive: this.exclusive
+        },
+        description: {
+          html: this.editorData,
+          image: this.descriptionPhoto
         }
       }
 
@@ -695,6 +857,24 @@ export default {
           .catch(err => {
             this.alertHandler('Произошла неизвестная ошибка, проверте консоль, Нажмите F12', true)
             console.log(err)
+          })
+    },
+
+    deleteComment(_id) {
+      const data = JSON.parse(localStorage.getItem('login'))
+
+      axios({
+        method: 'POST',
+        url: `api/products/comments/delete/${this.$route.params.id}`,
+        headers: {
+          Authorization: data.token
+        },
+        data: {_id}
+      })
+          .then(res => {
+            if (res.data.ok) {
+              this.comments = this.comments.filter(comment => comment._id !== _id)
+            }
           })
     }
   }

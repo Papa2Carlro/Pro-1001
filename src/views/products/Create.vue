@@ -2,7 +2,7 @@
   <CCol xs="12" lg="12">
     <CCard>
       <CCardHeader>
-        Создать Продукт
+        Создать Товар
       </CCardHeader>
       <CCardBody>
         <CAlert v-if="alert.visible" :color="alert.type">
@@ -29,6 +29,7 @@
                       class="mt-2"
                       min="1"
                       append="₴"
+                      step="0.01"
                       label="Цена продукта UAH"
                       placeholder="Введите цену..."
                       required
@@ -41,6 +42,7 @@
                       v-model="price.usd"
                       class="mt-2"
                       min="1"
+                      step="0.01"
                       append="$"
                       label="Цена продукта USD"
                       placeholder="Введите цену..."
@@ -54,6 +56,7 @@
                       v-model="newPrice.uah"
                       class="mt-2"
                       min="1"
+                      step="0.01"
                       append="₴"
                       label="Цена по скидке UAH"
                       placeholder="Введите цену..."
@@ -66,6 +69,7 @@
                       v-model="newPrice.usd"
                       class="mt-2"
                       min="1"
+                      step="0.01"
                       append="$"
                       label="Цена по скидке USD"
                       placeholder="Введите цену..."
@@ -349,6 +353,62 @@
                 </CCol>
               </CRow>
             </CTab>
+
+            <CTab title="Описание">
+              <CRow>
+                <CCol xs="12" md="12">
+
+                  <p class="mt-3"><strong>Описание продукта</strong></p>
+
+                  <CTabs class="mt-3" :vertical="vertical">
+                    <CTab active>
+                      <template slot="title">
+                        <CIcon :width="30" :content="$options.ru"/>
+                      </template>
+
+                      <ckeditor :editor="editor" v-model="editorData.ru"></ckeditor>
+                    </CTab>
+
+                    <CTab>
+                      <template slot="title">
+                        <CIcon :width="30" :content="$options.en"/>
+                      </template>
+
+                      <ckeditor :editor="editor" v-model="editorData.en"></ckeditor>
+                    </CTab>
+                  </CTabs>
+
+                </CCol>
+
+                <CCol xs="12" md="6">
+
+                  <p class="mt-3"><strong>Изображение</strong></p>
+
+                  <CImg
+                      v-if="descriptionPhoto"
+                      :src="getUrl(descriptionPhoto)"
+                      block
+                      fluid
+                      class="mb-2"
+                  />
+
+                  <CRow>
+                    <CCol xs="12" :md="descriptionPhoto ? 9 : 12">
+                      <CInputFile
+                          class="w-100"
+                          custom
+                          horizontal
+                          @change="uploadDescriptionPhotoHandler"
+                      />
+                    </CCol>
+
+                    <CCol v-if="descriptionPhoto" md="3">
+                      <CButton @click="descriptionPhoto = ''" class="mb-3 w-100" size="md" color="danger">Удалить</CButton>
+                    </CCol>
+                  </CRow>
+                </CCol>
+              </CRow>
+            </CTab>
           </CTabs>
 
           <CRow>
@@ -366,10 +426,20 @@
 <script>
 import axios from "@/plugin/axios"
 import config from "@/config/config"
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic"
+import flag from '@/mixins/flag.mixin'
 
 export default {
   name: 'CreatePost',
+  mixins: [flag],
   data: () => ({
+    vertical: {navs: 'col-md-1', content: 'col-md-11'},
+
+    editor: ClassicEditor,
+    editorData: {
+      ru: "<h2>Как бороться с приступом хронической головной боли</h2><p>Мы живем во втором тысячелетии. Он предлагает новые удивительные возможности и проблемы: вы можете выращивать собственный урожай, используя семена из Нидерландов. Есть клуб преданных садоводов.</p><p>Его участники - друзья, которые обмениваются семенами и опытом. Также они вместе ездят в поездки. Однажды они решили основать компанию и распространять радость от каннабиса.</p>",
+      en: "<h2>How to deal with pain from a chronic headache attack</h2><p>We live in the second millennium. It offers amazing new possibilities and challenges: you can grow your own crop using seeds from the Netherlands. There is a club of dedicated gardeners.</p><p>Its members are friends who share seeds and experiences. They also travel together. One day they decided to start a company and spread the joy of cannabis.</p>"
+    },
 
     name: 'Auto Russian Rocket Fuel',
     amount: 1,
@@ -411,6 +481,7 @@ export default {
     exclusive: false,
 
     mainPhoto: '/uploads/29112020-191950__778-ganga-big.jpg',
+    descriptionPhoto: '/uploads/02122020-204145__350-picture.jpg',
 
     images: [
       "/uploads/29112020-192653__786-picture-1.jpg",
@@ -495,6 +566,12 @@ export default {
       formData.append('image', event[0]);
 
       this.mainPhoto = await this.addImageHandler(formData)
+    },
+    async uploadDescriptionPhotoHandler(event) {
+      let formData = new FormData();
+      formData.append('image', event[0]);
+
+      this.descriptionPhoto = await this.addImageHandler(formData)
     },
     async uploadImagesHandler(event) {
       let formData = new FormData();
@@ -610,6 +687,10 @@ export default {
             filter: this.filterHeight()
           },
           exclusive: this.exclusive
+        },
+        description: {
+          html: this.editorData,
+          image: this.descriptionPhoto
         }
       }
 
