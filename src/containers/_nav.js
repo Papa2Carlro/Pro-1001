@@ -84,6 +84,12 @@ export default [
       },
       {
         _name: 'CSidebarNavItem',
+        name: 'Почтовая Рассылка',
+        to: '/mailer',
+        icon: 'cil-cursor',
+      },
+      {
+        _name: 'CSidebarNavItem',
         name: 'Магазины',
         to: '/stores',
         icon: 'cil-cursor',

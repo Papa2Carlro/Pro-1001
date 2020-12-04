@@ -14,6 +14,7 @@ const Coupons = () => import('@/views/Coupons')
 const Store = () => import('@/views/Store')
 const Faq = () => import('@/views/Faq')
 const Filters = () => import('@/views/Filters')
+const Mailer = () => import('@/views/Mailer')
 
 // Views - Components
 const Cards = () => import('@/views/base/Cards')
@@ -106,6 +107,11 @@ function configRoutes () {
           path: 'coupons',
           name: 'Coupons',
           component: Coupons
+        },
+        {
+          path: 'mailer',
+          name: 'Mailer',
+          component: Mailer
         },
         {
           path: 'filters',

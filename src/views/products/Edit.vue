@@ -822,7 +822,7 @@ export default {
             if (res.data.ok) {
               this.alertHandler(res.data.msg, false)
 
-              setTimeout(() => this.$router.go(-1), 5000)
+              setTimeout(() => this.$router.go(-1), 2000)
             } else {
               this.alertHandler(res.data.msg, true)
               console.log(res.data)
@@ -848,7 +848,7 @@ export default {
             if (res.data.ok) {
               this.alertHandler(res.data.msg, false)
 
-              setTimeout(() => this.$router.go(-1), 5000)
+              setTimeout(() => this.$router.go(-1), 1500)
             } else {
               this.alertHandler('Сервер вернул ошибку, проверте консоль, Нажмите F12', true)
               console.log(res.data)
