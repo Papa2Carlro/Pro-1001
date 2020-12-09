@@ -20,12 +20,8 @@
 
                   <CInput class="mt-3" type="text" v-model="title.ru" prepend="Вопрос"/>
 
-                  <CTextarea
-                      label="Ответ"
-                      v-model="text.ru"
-                      placeholder="Введите ответ на вопрос..."
-                      rows="6"
-                  />
+                  <p>Ответ</p>
+                  <ckeditor :editor="editor" v-model="text.ru"></ckeditor>
                 </CTab>
 
                 <CTab>
@@ -35,16 +31,12 @@
 
                   <CInput class="mt-3" type="text" v-model="title.en" prepend="Вопрос"/>
 
-                  <CTextarea
-                      label="Ответ"
-                      v-model="text.en"
-                      placeholder="Введите ответ на вопрос..."
-                      rows="6"
-                  />
+                  <p>Ответ</p>
+                  <ckeditor :editor="editor" v-model="text.en"></ckeditor>
                 </CTab>
               </CTabs>
 
-              <CButton type="submit" size="md" color="dark">
+              <CButton class="mt-4" type="submit" size="md" color="dark">
                 Добавить
               </CButton>
             </CForm>
@@ -98,12 +90,8 @@
 
                           <CInput class="mt-3" type="text" v-model="item.title.ru" prepend="Вопрос"/>
 
-                          <CTextarea
-                              label="Ответ"
-                              v-model="item.text.ru"
-                              placeholder="Введите ответ на вопрос..."
-                              rows="6"
-                          />
+                          <p>Ответ</p>
+                          <ckeditor :editor="editor" v-model="item.text.ru"></ckeditor>
                         </CTab>
 
                         <CTab>
@@ -113,19 +101,15 @@
 
                           <CInput class="mt-3" type="text" v-model="item.title.en" prepend="Вопрос"/>
 
-                          <CTextarea
-                              label="Ответ"
-                              v-model="item.text.en"
-                              placeholder="Введите ответ на вопрос..."
-                              rows="6"
-                          />
+                          <p>Ответ</p>
+                          <ckeditor :editor="editor" v-model="item.text.en"></ckeditor>
                         </CTab>
                       </CTabs>
 
-                      <CButton type="submit" size="sm" color="info" class="">
+                      <CButton type="submit" size="sm" color="info" class="mt-4">
                         Применить
                       </CButton>
-                      <CButton @click="deleteFaqHandler(item)" size="sm" color="danger" class="ml-1">
+                      <CButton @click="deleteFaqHandler(item)" size="sm" color="danger" class="mt-4 ml-1">
                         Удалить
                       </CButton>
                     </CForm>
@@ -143,6 +127,7 @@
 <script>
 import axios from "@/plugin/axios"
 import flag from '@/mixins/flag.mixin'
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic"
 
 const fields = [
   {key: 'title', label: 'Вопрос', _style: 'min-width:200px', _classes: 'font-weight-bold'},
@@ -165,6 +150,7 @@ export default {
     details: [],
     collapseDuration: 0,
 
+    editor: ClassicEditor,
     title: {
       en: 'How are seeds divided by the kinds?',
       ru: 'Как семена делятся по видам?'
