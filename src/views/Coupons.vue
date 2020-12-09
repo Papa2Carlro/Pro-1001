@@ -136,6 +136,7 @@ export default {
         })
         .catch(() => {
           this.$router.push({name: 'Login'})
+          localStorage.removeItem('login')
         })
   },
   methods: {

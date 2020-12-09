@@ -81,9 +81,9 @@ export default {
               this.alertHandler(res.data.msg, true)
             }
           })
-          .catch(err => {
-            console.log(err)
-            this.alertHandler('Произошла неизвестная ошибка, проверте консоль, Нажмите F12', true)
+          .catch(() => {
+            this.$router.push({name: 'Login'})
+            localStorage.removeItem('login')
           })
     }
   }

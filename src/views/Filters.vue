@@ -512,9 +512,9 @@ export default {
               console.log(res.data)
             }
           })
-          .catch(err => {
-            this.alertHandler('Произошла неизвестная ошибка, проверте консоль, Нажмите F12', true)
-            console.log(err)
+          .catch(() => {
+            this.$router.push({name: 'Login'})
+            localStorage.removeItem('login')
           })
     },
     createNewTasteFilter() {
@@ -553,9 +553,9 @@ export default {
               console.log(res.data)
             }
           })
-          .catch(err => {
-            this.alertHandler('Произошла неизвестная ошибка, проверте консоль, Нажмите F12', true)
-            console.log(err)
+          .catch(() => {
+            this.$router.push({name: 'Login'})
+            localStorage.removeItem('login')
           })
     },
     createNewEffectFilter() {
@@ -594,9 +594,9 @@ export default {
               console.log(res.data)
             }
           })
-          .catch(err => {
-            this.alertHandler('Произошла неизвестная ошибка, проверте консоль, Нажмите F12', true)
-            console.log(err)
+          .catch(() => {
+            this.$router.push({name: 'Login'})
+            localStorage.removeItem('login')
           })
     },
 

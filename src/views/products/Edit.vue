@@ -21,7 +21,7 @@
 
         <CForm @submit="editProductHandler">
           <CTabs>
-            <CTab title="Основная информация" >
+            <CTab title="Основная информация" active>
               <CInput
                   type="text"
                   v-model="name"
@@ -37,7 +37,6 @@
                       type="number"
                       v-model="price.uah"
                       class="mt-2"
-                      min="1"
                       step="0.01"
                       append="₴"
                       label="Цена продукта UAH"
@@ -51,7 +50,6 @@
                       type="number"
                       v-model="price.usd"
                       class="mt-2"
-                      min="1"
                       step="0.01"
                       append="$"
                       label="Цена продукта USD"
@@ -65,7 +63,6 @@
                       type="number"
                       v-model="newPrice.uah"
                       class="mt-2"
-                      min="1"
                       step="0.01"
                       append="₴"
                       label="Цена по скидке UAH"
@@ -78,23 +75,10 @@
                       type="number"
                       v-model="newPrice.usd"
                       class="mt-2"
-                      min="1"
                       step="0.01"
                       append="$"
                       label="Цена по скидке USD"
                       placeholder="Введите цену..."
-                  />
-                </CCol>
-
-                <CCol sm="6" md="4">
-                  <CInput
-                      type="number"
-                      v-model="amount"
-                      class="mt-2"
-                      min="1"
-                      prepend="Колл."
-                      label="Колличество на складе"
-                      placeholder="Введите колличество..."
                   />
                 </CCol>
               </CRow>
@@ -420,7 +404,7 @@
               </CRow>
             </CTab>
 
-            <CTab title="Комментарии" active>
+            <CTab title="Комментарии">
               <CDataTable
                   :items="comments"
                   :fields="fields"
@@ -500,7 +484,6 @@ export default {
     collapseDuration: 0,
 
     name: '',
-    amount: undefined,
     price: {},
     newPrice: {},
 
@@ -618,7 +601,6 @@ export default {
             this.name = data.name
             this.id = data._id
             this.visible = data.visible
-            this.amount = data.amount
             this.price = data.price
             this.newPrice = data.newPrice
 
@@ -742,7 +724,6 @@ export default {
           || !this.taste
           || !this.effect
           || !this.height
-          || !this.amount
     },
 
     alertHandler(msg, error) {
@@ -774,7 +755,6 @@ export default {
         name: this.name,
         price: this.price,
         newPrice: this.newPrice,
-        amount: this.amount,
         pictures: [
           this.mainPhoto,
           ...this.images
@@ -828,9 +808,9 @@ export default {
               console.log(res.data)
             }
           })
-          .catch(err => {
-            this.alertHandler('Произошла неизвестная ошибка, проверте консоль, Нажмите F12', true)
-            console.log(err)
+          .catch(() => {
+            this.$router.push({name: 'Login'})
+            localStorage.removeItem('login')
           })
     },
 
@@ -854,9 +834,9 @@ export default {
               console.log(res.data)
             }
           })
-          .catch(err => {
-            this.alertHandler('Произошла неизвестная ошибка, проверте консоль, Нажмите F12', true)
-            console.log(err)
+          .catch(() => {
+            this.$router.push({name: 'Login'})
+            localStorage.removeItem('login')
           })
     },
 
