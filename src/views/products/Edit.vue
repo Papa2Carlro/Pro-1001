@@ -98,7 +98,7 @@
 
                 <CCol sm="6">
                   <CSelect
-                      label="Сорт"
+                      label="Тип Сорт"
                       size="md"
                       class="mt-2"
                       :value.sync="variety"
@@ -118,13 +118,17 @@
                 </CCol>
 
                 <CCol sm="6">
-                  <CSelect
-                      label="Вкус"
-                      size="md"
-                      :value.sync="taste"
-                      :options="tasteVariety"
-                      placeholder="Выберете вкус"
-                  />
+                  <p class="mb-2">Терпены</p>
+                  <CDropdown
+                      :show.sync="show"
+                      togglerText="Выберете терпены"
+                      color="light"
+                  >
+                    <CDropdownItem v-for="option in tasteVariety" @click="tasteHandler(option)" class="item" :key="option.value"
+                                   :class="{isActive: option.isActive}">
+                      {{ option.label }}
+                    </CDropdownItem>
+                  </CDropdown>
                 </CCol>
 
                 <CCol sm="6">
@@ -225,7 +229,7 @@
                 <CCol sm="3">
                   <CInput
                       type="number"
-                      v-model="thc"
+                      v-model="thc.from"
                       min="1"
                       label="Содержание ТГК"
                       append="%"
@@ -236,11 +240,10 @@
                 <CCol sm="3">
                   <CInput
                       type="number"
-                      v-model="yieldStr"
+                      v-model="thc.to"
                       min="1"
-                      label="Колл. грамм на шишку"
-                      append="гр."
-                      required
+                      label="Содержание ТГК до"
+                      append="%"
                   />
                 </CCol>
 
@@ -268,13 +271,24 @@
                   />
                 </CCol>
 
-                <CCol sm="6">
+                <CCol sm="3">
                   <CSelect
                       label="Урожайность для фильтрации"
                       size="md"
                       :value.sync="harvestFilter"
                       :options="harvestVariety"
                       placeholder="Выберете урожайность"
+                  />
+                </CCol>
+
+                <CCol sm="3">
+                  <CInput
+                      type="number"
+                      v-model="yieldStr"
+                      min="1"
+                      label="Колл. грамм на штамм"
+                      append="гр."
+                      required
                   />
                 </CCol>
 
@@ -478,6 +492,7 @@ export default {
     vertical: {navs: 'col-md-1', content: 'col-md-11'},
     editor: ClassicEditor,
     editorData: {},
+    show: false,
 
     fields,
     details: [],
@@ -500,7 +515,7 @@ export default {
     power: '',
     fem: '',
     place: '',
-    taste: '',
+    taste: [],
     effect: '',
     height: undefined,
     harvestFilter: '',
@@ -515,10 +530,7 @@ export default {
     images: [],
 
     // Select
-    optionsVariety: [
-      {value: 'indica', label: 'Индика'},
-      {value: 'sativa', label: 'Сатива'}
-    ],
+    optionsVariety: [],
     geneticsVariety: [],
     tasteVariety: [],
     effectVariety: [],
@@ -572,7 +584,7 @@ export default {
         .then(res => {
           if (res.data.ok) {
             this.tasteVariety = res.data.body.map(item => {
-              return {value: item.filterId, label: item.name.ru}
+              return {value: item.filterId, label: item.name.ru, isActive: false}
             })
           }
         })
@@ -581,6 +593,15 @@ export default {
         .then(res => {
           if (res.data.ok) {
             this.effectVariety = res.data.body.map(item => {
+              return {value: item.filterId, label: item.name.ru}
+            })
+          }
+        })
+
+    axios({method: 'GET', url: 'api/filters/variety'})
+        .then(res => {
+          if (res.data.ok) {
+            this.optionsVariety = res.data.body.map(item => {
               return {value: item.filterId, label: item.name.ru}
             })
           }
@@ -621,6 +642,16 @@ export default {
             this.fem = dataGeneral.fem
             this.place = dataGeneral.place
             this.taste = dataGeneral.taste
+            this.tasteVariety.map(filter => {
+              const [item] = this.taste.filter(item => item === filter.value)
+
+              console.log(item)
+
+              if(item) {
+                filter.isActive = true
+              }
+            })
+
             this.effect = dataGeneral.effect
             this.height = dataGeneral.height
             this.harvestFilter = dataGeneral.harvest.filter
@@ -643,6 +674,23 @@ export default {
         })
   },
   methods: {
+    async tasteHandler(taste) {
+      this.show = true
+      await this.tasteVariety.map(item => {
+        if (item.value === taste.value) {
+          this.show = true
+          if (item.isActive) {
+            item.isActive = false
+            this.taste = this.taste.filter(filter => filter !== item.value)
+          } else {
+            item.isActive = true
+            this.taste.push(item.value)
+          }
+        }
+      })
+
+      this.show = true
+    },
     disableProductHandler (bool) {
       const data = JSON.parse(localStorage.getItem('login'))
 
@@ -721,7 +769,7 @@ export default {
           || !this.power
           || !this.fem
           || !this.place
-          || !this.taste
+          || this.taste.length === 0
           || !this.effect
           || !this.height
     },

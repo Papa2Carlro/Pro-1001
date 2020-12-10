@@ -9,7 +9,7 @@
             </CAlert>
 
             <CTabs>
-              <CTab title="Генетика" active>
+              <CTab title="Генетика" active >
                 <CCard class="mt-3">
                   <CCardHeader>
                     Создать фильтр
@@ -108,7 +108,7 @@
                   </CCardBody>
                 </CCard>
               </CTab>
-              <CTab title="Вкус">
+              <CTab title="Терпены">
                 <CCard class="mt-3">
                   <CCardHeader>
                     Создать фильтр
@@ -358,6 +358,105 @@
                   </CCardBody>
                 </CCard>
               </CTab>
+              <CTab title="Тип сорта">
+                <CCard class="mt-3">
+                  <CCardHeader>
+                    Создать сорт
+                  </CCardHeader>
+
+                  <CCardBody>
+                    <CForm @submit="createNewVarietyFilter">
+                      <CRow>
+                        <CCol sm="6">
+                          <CInput class="mt-3" type="text" v-model="variety.en" prepend="Имя на анг."/>
+                        </CCol>
+
+                        <CCol sm="6">
+                          <CInput class="mt-3" type="text" v-model="variety.ru" prepend="Имя на рус."/>
+                        </CCol>
+                      </CRow>
+
+                      <CInput
+                          class="mt-3"
+                          type="text"
+                          v-model="varietyId"
+                          prepend="Id"
+                          description="Введите ключевые слова по которому будет производится поиск"/>
+
+                      <CButton type="submit" size="md" color="dark">
+                        Добавить
+                      </CButton>
+                    </CForm>
+                  </CCardBody>
+                </CCard>
+
+                <CCard>
+                  <CCardHeader>
+                    Список сортов
+                  </CCardHeader>
+                  <CCardBody>
+                    <CDataTable
+                        :items="varietyItems"
+                        :fields="fields"
+                        :items-per-page="10"
+                        hover
+                        items-per-page-select
+                        sorter
+                        pagination
+                    >
+                      <template #name="{item}">
+                        <td class="py-2">
+                          <strong class="font-lg">{{ item.name.ru }}</strong>
+                        </td>
+                      </template>
+                      <template #show_details="{item, index}">
+                        <td class="py-2">
+                          <CButton
+                              color="primary"
+                              variant="outline"
+                              square
+                              size="sm"
+                              @click="toggleDetailsVariety(item, index)"
+                          >
+                            {{ Boolean(item._toggled) ? 'Скрыть' : 'Показать' }}
+                          </CButton>
+                        </td>
+                      </template>
+                      <template #details="{item}">
+                        <CCollapse :show="Boolean(item._toggled)" :duration="collapseDuration">
+                          <CCardBody>
+                            <CForm @submit="editVarietyHandler(item)">
+                              <CRow>
+                                <CCol sm="6">
+                                  <CInput class="mt-3" type="text" v-model="item.name.en" prepend="Имя на анг."/>
+                                </CCol>
+
+                                <CCol sm="6">
+                                  <CInput class="mt-3" type="text" v-model="item.name.ru" prepend="Имя на рус."/>
+                                </CCol>
+                              </CRow>
+
+                              <CInput
+                                  class="mt-3"
+                                  type="text"
+                                  v-model="item.filterId"
+                                  prepend="Id"
+                                  description="Введите ключевые слова по которому будет производится поиск"/>
+
+                              <CButton type="submit" size="sm" color="info" class="">
+                                Применить
+                              </CButton>
+                              <CButton @click="deleteVarietyHandler(item)" size="sm" color="danger" class="ml-1">
+                                Удалить
+                              </CButton>
+                            </CForm>
+                          </CCardBody>
+                        </CCollapse>
+                      </template>
+                    </CDataTable>
+                  </CCardBody>
+                </CCard>
+              </CTab>
             </CTabs>
           </CCardBody>
         </CCard>
@@ -414,6 +513,13 @@ export default {
     effectId: '',
     effectItems: [],
 
+    variety: {
+      ru: '',
+      en: ''
+    },
+    varietyId: '',
+    varietyItems: [],
+
     alert: {
       visible: false,
       msg: '',
@@ -429,6 +535,9 @@ export default {
     },
     effectId() {
       this.effectId = this.id(this.effectId)
+    },
+    varietyId() {
+      this.varietyId = this.id(this.varietyId)
     }
   },
   created() {
@@ -460,6 +569,18 @@ export default {
         .then(res => {
           if (res.data.ok) {
             this.effectItems = res.data.body.map((item, id) => {
+              return {...item, id}
+            })
+          }
+        })
+        .catch(() => {
+          this.$router.push({name: 'Login'})
+        })
+
+    axios({method: 'GET', url: 'api/filters/variety'})
+        .then(res => {
+          if (res.data.ok) {
+            this.varietyItems = res.data.body.map((item, id) => {
               return {...item, id}
             })
           }
@@ -599,6 +720,45 @@ export default {
             localStorage.removeItem('login')
           })
     },
+    createNewVarietyFilter() {
+      if (!this.variety.ru || !this.variety.en || !this.varietyId) {
+        this.alertHandler('Форма не валидна', true)
+        return
+      }
+
+      const data = JSON.parse(localStorage.getItem('login'))
+
+      const formData = {
+        name: this.variety,
+        filterId: this.varietyId
+      }
+
+      axios({
+        method: 'POST',
+        url: 'api/filters/variety',
+        headers: {
+          Authorization: data.token
+        },
+        data: formData
+      })
+          .then(res => {
+            if (res.data.ok) {
+              this.alertHandler(res.data.msg, false)
+              this.varietyItems.push({...res.data.body, id: this.varietyItems.length})
+
+              this.variety.ru = ''
+              this.variety.en = ''
+              this.varietyId = ''
+            } else {
+              this.alertHandler('Сервер вернул ошибку, проверте консоль, Нажмите F12', true)
+              console.log(res.data)
+            }
+          })
+          .catch(() => {
+            this.$router.push({name: 'Login'})
+            localStorage.removeItem('login')
+          })
+    },
 
     // Edit
     editGeneticsFilterHandler (item) {
@@ -658,6 +818,27 @@ export default {
             if (res.data.ok) {
               this.alertHandler(res.data.msg, false)
               this.toggleDetailsEffect(item)
+            } else {
+              this.alertHandler('Сервер вернул ошибку, проверте консоль, Нажмите F12', true)
+              console.log(res.data)
+            }
+          })
+    },
+    editVarietyHandler (item) {
+      const data = JSON.parse(localStorage.getItem('login'))
+
+      axios({
+        method: 'PUT',
+        url: `api/filters/variety/${item._id}`,
+        headers: {
+          Authorization: data.token
+        },
+        data: item
+      })
+          .then(res => {
+            if (res.data.ok) {
+              this.alertHandler(res.data.msg, false)
+              this.toggleDetailsVariety(item)
             } else {
               this.alertHandler('Сервер вернул ошибку, проверте консоль, Нажмите F12', true)
               console.log(res.data)
@@ -732,6 +913,28 @@ export default {
             }
           })
     },
+    deleteVarietyHandler (item) {
+      const data = JSON.parse(localStorage.getItem('login'))
+
+      axios({
+        method: 'DELETE',
+        url: `api/filters/variety/${item._id}`,
+        headers: {
+          Authorization: data.token
+        },
+        data: item
+      })
+          .then(res => {
+            if (res.data.ok) {
+              this.alertHandler(res.data.msg, false)
+              this.varietyItems = this.varietyItems.filter(filter => filter._id !== item._id)
+              this.toggleDetailsVariety(item)
+            } else {
+              this.alertHandler('Сервер вернул ошибку, проверте консоль, Нажмите F12', true)
+              console.log(res.data)
+            }
+          })
+    },
 
     // Toggle
     toggleDetailsGenetics(item) {
@@ -750,6 +953,13 @@ export default {
     },
     toggleDetailsEffect(item) {
       this.$set(this.effectItems[item.id], '_toggled', !item._toggled)
+      this.collapseDuration = 300
+      this.$nextTick(() => {
+        this.collapseDuration = 0
+      })
+    },
+    toggleDetailsVariety(item) {
+      this.$set(this.varietyItems[item.id], '_toggled', !item._toggled)
       this.collapseDuration = 300
       this.$nextTick(() => {
         this.collapseDuration = 0

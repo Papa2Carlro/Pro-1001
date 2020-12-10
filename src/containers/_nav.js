@@ -51,7 +51,7 @@ export default [
         icon: 'cil-star',
         items: [
           {
-            name: 'Методы оптаты',
+            name: 'Методы оплаты',
             to: '/pages/payment'
           },
           {

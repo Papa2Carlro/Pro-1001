@@ -88,7 +88,7 @@
 
                 <CCol sm="6">
                   <CSelect
-                      label="Сорт"
+                      label="Тип Сорта"
                       size="md"
                       class="mt-2"
                       :value.sync="variety"
@@ -108,13 +108,17 @@
                 </CCol>
 
                 <CCol sm="6">
-                  <CSelect
-                      label="Вкус"
-                      size="md"
-                      :value.sync="taste"
-                      :options="tasteVariety"
-                      placeholder="Выберете вкус"
-                  />
+                  <p class="mb-2">Терпены</p>
+                  <CDropdown
+                      :show.sync="show"
+                      togglerText="Выберете терпены"
+                      color="light"
+                  >
+                    <CDropdownItem v-for="option in tasteVariety" @click="tasteHandler(option)" class="item" :key="option.value"
+                                   :class="{isActive: option.isActive}">
+                        {{ option.label }}
+                    </CDropdownItem>
+                  </CDropdown>
                 </CCol>
 
                 <CCol sm="6">
@@ -215,7 +219,7 @@
                 <CCol sm="3">
                   <CInput
                       type="number"
-                      v-model="thc"
+                      v-model="thc.from"
                       min="1"
                       label="Содержание ТГК"
                       append="%"
@@ -226,11 +230,10 @@
                 <CCol sm="3">
                   <CInput
                       type="number"
-                      v-model="yieldStr"
+                      v-model="thc.to"
                       min="1"
-                      label="Колл. грамм на шишку"
-                      append="гр."
-                      required
+                      label="Содержание ТГК до"
+                      append="%"
                   />
                 </CCol>
 
@@ -258,13 +261,24 @@
                   />
                 </CCol>
 
-                <CCol sm="6">
+                <CCol sm="3">
                   <CSelect
                       label="Урожайность для фильтрации"
                       size="md"
                       :value.sync="harvestFilter"
                       :options="harvestVariety"
                       placeholder="Выберете урожайность"
+                  />
+                </CCol>
+
+                <CCol sm="3">
+                  <CInput
+                      type="number"
+                      v-model="yieldStr"
+                      min="1"
+                      label="Колл. грамм на штамм"
+                      append="гр."
+                      required
                   />
                 </CCol>
 
@@ -387,7 +401,8 @@
                     </CCol>
 
                     <CCol v-if="descriptionPhoto" md="3">
-                      <CButton @click="descriptionPhoto = ''" class="mb-3 w-100" size="md" color="danger">Удалить</CButton>
+                      <CButton @click="descriptionPhoto = ''" class="mb-3 w-100" size="md" color="danger">Удалить
+                      </CButton>
                     </CCol>
                   </CRow>
                 </CCol>
@@ -424,6 +439,7 @@ export default {
       ru: "<h2>Как бороться с приступом хронической головной боли</h2><p>Мы живем во втором тысячелетии. Он предлагает новые удивительные возможности и проблемы: вы можете выращивать собственный урожай, используя семена из Нидерландов. Есть клуб преданных садоводов.</p><p>Его участники - друзья, которые обмениваются семенами и опытом. Также они вместе ездят в поездки. Однажды они решили основать компанию и распространять радость от каннабиса.</p>",
       en: "<h2>How to deal with pain from a chronic headache attack</h2><p>We live in the second millennium. It offers amazing new possibilities and challenges: you can grow your own crop using seeds from the Netherlands. There is a club of dedicated gardeners.</p><p>Its members are friends who share seeds and experiences. They also travel together. One day they decided to start a company and spread the joy of cannabis.</p>"
     },
+    show: false,
 
     name: 'Auto Russian Rocket Fuel',
     price: {
@@ -450,14 +466,17 @@ export default {
       from: 2,
       to: 2.5
     },
-    thc: 15,
+    thc: {
+      from: 15,
+      to: ''
+    },
     yieldStr: 50,
     genetics: '',
     bloom: '',
     power: '',
     fem: '',
     place: '',
-    taste: '',
+    taste: [],
     effect: '',
     height: 60,
     harvestFilter: '',
@@ -474,10 +493,7 @@ export default {
     ],
 
     // Select
-    optionsVariety: [
-      {value: 'indica', label: 'Индика'},
-      {value: 'sativa', label: 'Сатива'}
-    ],
+    optionsVariety: [],
     geneticsVariety: [],
     tasteVariety: [],
     effectVariety: [],
@@ -529,7 +545,7 @@ export default {
         .then(res => {
           if (res.data.ok) {
             this.tasteVariety = res.data.body.map(item => {
-              return {value: item.filterId, label: item.name.ru}
+              return {value: item.filterId, label: item.name.ru, isActive: false}
             })
           }
         })
@@ -542,8 +558,34 @@ export default {
             })
           }
         })
+
+    axios({method: 'GET', url: 'api/filters/variety'})
+        .then(res => {
+          if (res.data.ok) {
+            this.optionsVariety = res.data.body.map(item => {
+              return {value: item.filterId, label: item.name.ru}
+            })
+          }
+        })
   },
   methods: {
+    async tasteHandler(taste) {
+      this.show = true
+      await this.tasteVariety.map(item => {
+        if (item.value === taste.value) {
+          this.show = true
+          if (item.isActive) {
+            item.isActive = false
+            this.taste = this.taste.filter(filter => filter !== item.value)
+          } else {
+            item.isActive = true
+            this.taste.push(item.value)
+          }
+        }
+      })
+
+      this.show = true
+    },
     async uploadMainPhotoHandler(event) {
       let formData = new FormData();
       formData.append('image', event[0]);
@@ -607,7 +649,7 @@ export default {
           || !this.power
           || !this.fem
           || !this.place
-          || !this.taste
+          || this.taste.length === 0
           || !this.effect
           || !this.height
     },
@@ -706,5 +748,15 @@ export default {
 .btn {
   display: flex;
   justify-content: flex-end;
+}
+</style>
+
+<style>
+.item:active {
+  background: transparent;
+}
+.isActive {
+  background: #321fdb !important;
+  color: #fff !important;
 }
 </style>
