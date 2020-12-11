@@ -245,13 +245,12 @@
                       v-model="harvest.to"
                       min="1"
                       label="Урожайность до"
-                      append="Месяцев"
+                      append="Дней"
                       step="0.1"
-                      required
                   />
                 </CCol>
 
-                <CCol sm="3">
+                <CCol sm="6">
                   <CSelect
                       label="Урожайность для фильтрации"
                       size="md"
@@ -264,23 +263,25 @@
                 <CCol sm="3">
                   <CInput
                       type="number"
-                      v-model="yieldStr"
-                      min="1"
-                      label="Колл. грамм на штамм"
-                      append="гр."
+                      v-model="height.from"
+                      min="40"
+                      max="220"
+                      label="Высота от"
+                      prepend="От"
+                      append="см."
                       required
                   />
                 </CCol>
 
-                <CCol sm="4">
+                <CCol sm="3">
                   <CInput
                       type="number"
-                      v-model="height"
+                      v-model="height.to"
                       min="40"
                       max="220"
+                      prepend="До"
                       label="Высота"
                       append="см."
-                      required
                   />
                 </CCol>
 
@@ -460,14 +461,16 @@ export default {
       from: 15,
       to: ''
     },
-    yieldStr: 50,
     genetics: '',
     bloom: '',
     fem: '',
     place: '',
     taste: [],
     effect: '',
-    height: 60,
+    height: {
+      from: 60,
+      to: 120
+    },
     harvestFilter: '',
     exclusive: false,
 
@@ -626,7 +629,6 @@ export default {
           || !this.productivity.from
           || !this.harvest.to
           || !this.harvest.from
-          || !this.yieldStr
           || !this.genetics
           || !this.harvestFilter
           || !this.bloom
@@ -634,7 +636,7 @@ export default {
           || !this.place
           || this.taste.length === 0
           || !this.effect
-          || !this.height
+          || !this.height.from
     },
 
     alertHandler(msg, error) {
@@ -657,12 +659,22 @@ export default {
     },
 
     filterHeight() {
-      if (this.height >= 40 && this.height < 80) {
-        return 'small'
-      } else if (this.height >= 80 && this.height < 160) {
-        return 'medium'
-      } else if (this.height >= 160 && this.height <= 220) {
-        return 'big'
+      if (this.height.to) {
+        if (this.height.to >= 40 && this.height.to < 80) {
+          return 'small'
+        } else if (this.height.to >= 80 && this.height.to < 160) {
+          return 'medium'
+        } else if (this.height.to >= 160 && this.height.to <= 220) {
+          return 'big'
+        }
+      } else {
+        if (this.height.from >= 40 && this.height.from < 80) {
+          return 'small'
+        } else if (this.height.from >= 80 && this.height.from < 160) {
+          return 'medium'
+        } else if (this.height.from >= 160 && this.height.from <= 220) {
+          return 'big'
+        }
       }
     },
 
@@ -687,7 +699,6 @@ export default {
           variety: this.variety,
           flowering: this.flowering,
           productivity: this.productivity,
-          yield: this.yieldStr,
           genetics: this.genetics,
           harvest: {
             filter: this.harvestFilter,
@@ -701,7 +712,7 @@ export default {
           taste: this.taste,
           effect: this.effect,
           height: {
-            sm: this.height,
+            sm: `${this.height.from}-${this.height.to}`,
             filter: this.filterHeight()
           },
           exclusive: this.exclusive

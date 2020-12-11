@@ -255,13 +255,12 @@
                       v-model="harvest.to"
                       min="1"
                       label="Урожайность до"
-                      append="Месяцев"
+                      append="Дней"
                       step="0.1"
-                      required
                   />
                 </CCol>
 
-                <CCol sm="3">
+                <CCol sm="6">
                   <CSelect
                       label="Урожайность для фильтрации"
                       size="md"
@@ -274,23 +273,25 @@
                 <CCol sm="3">
                   <CInput
                       type="number"
-                      v-model="yieldStr"
-                      min="1"
-                      label="Колл. грамм на штамм"
-                      append="гр."
+                      v-model="height.from"
+                      min="40"
+                      max="220"
+                      label="Высота от"
+                      prepend="От"
+                      append="см."
                       required
                   />
                 </CCol>
 
-                <CCol sm="4">
+                <CCol sm="3">
                   <CInput
                       type="number"
-                      v-model="height.sm"
+                      v-model="height.to"
                       min="40"
                       max="220"
+                      prepend="До"
                       label="Высота"
                       append="см."
-                      required
                   />
                 </CCol>
 
@@ -499,14 +500,16 @@ export default {
     productivity: {},
     harvest: {},
     thc: undefined,
-    yieldStr: undefined,
     genetics: '',
     bloom: '',
     fem: '',
     place: '',
     taste: [],
     effect: '',
-    height: undefined,
+    height: {
+      from: '',
+      to: ''
+    },
     harvestFilter: '',
     exclusive: undefined,
     heightFilter: '',
@@ -618,7 +621,6 @@ export default {
             this.harvest.from = dataGeneral.harvest.from
             this.harvest.to = dataGeneral.harvest.to
             this.thc = dataGeneral.thc
-            this.yieldStr = dataGeneral.yield
             this.genetics = dataGeneral.genetics
             this.bloom = dataGeneral.bloom
             this.fem = dataGeneral.fem
@@ -631,7 +633,8 @@ export default {
             })
 
             this.effect = dataGeneral.effect
-            this.height = dataGeneral.height
+            this.height.from = dataGeneral.height.sm.includes('-') ? dataGeneral.height.sm.split('-')[0] : dataGeneral.height.sm
+            this.height.to = dataGeneral.height.sm.includes('-') ? dataGeneral.height.sm.split('-')[1] : ''
             this.harvestFilter = dataGeneral.harvest.filter
 
             this.editorData = data.description.html
@@ -740,7 +743,6 @@ export default {
           || !this.productivity.from
           || !this.harvest.to
           || !this.harvest.from
-          || !this.yieldStr
           || !this.genetics
           || !this.harvestFilter
           || !this.bloom
@@ -748,7 +750,7 @@ export default {
           || !this.place
           || this.taste.length === 0
           || !this.effect
-          || !this.height
+          || !this.height.from
     },
 
     alertHandler(msg, error) {
@@ -759,12 +761,22 @@ export default {
       setTimeout(() => this.alert.visible = false, 5000)
     },
     filterHeight() {
-      if (this.height.sm >= 40 && this.height.sm < 80) {
-        return 'small'
-      } else if (this.height.sm >= 80 && this.height.sm < 160) {
-        return 'medium'
-      } else if (this.height.sm >= 160 && this.height.sm <= 220) {
-        return 'big'
+      if (this.height.to) {
+        if (this.height.to >= 40 && this.height.to < 80) {
+          return 'small'
+        } else if (this.height.to >= 80 && this.height.to < 160) {
+          return 'medium'
+        } else if (this.height.to >= 160 && this.height.to <= 220) {
+          return 'big'
+        }
+      } else {
+        if (this.height.from >= 40 && this.height.from < 80) {
+          return 'small'
+        } else if (this.height.from >= 80 && this.height.from < 160) {
+          return 'medium'
+        } else if (this.height.from >= 160 && this.height.from <= 220) {
+          return 'big'
+        }
       }
     },
     filterPower() {
@@ -800,7 +812,6 @@ export default {
           variety: this.variety,
           flowering: this.flowering,
           productivity: this.productivity,
-          yield: this.yieldStr,
           genetics: this.genetics,
           harvest: {
             filter: this.harvestFilter,
@@ -814,7 +825,7 @@ export default {
           taste: this.taste,
           effect: this.effect,
           height: {
-            sm: this.height.sm,
+            sm: `${this.height.from}-${this.height.to}`,
             filter: this.filterHeight()
           },
           exclusive: this.exclusive
