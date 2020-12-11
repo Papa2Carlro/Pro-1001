@@ -143,16 +143,6 @@
 
                 <CCol sm="6">
                   <CSelect
-                      label="Крепость"
-                      size="md"
-                      :value.sync="power"
-                      :options="powerVariety"
-                      placeholder="Выберете крепость"
-                  />
-                </CCol>
-
-                <CCol sm="6">
-                  <CSelect
                       label="Пол"
                       size="md"
                       :value.sync="fem"
@@ -473,7 +463,6 @@ export default {
     yieldStr: 50,
     genetics: '',
     bloom: '',
-    power: '',
     fem: '',
     place: '',
     taste: [],
@@ -504,13 +493,8 @@ export default {
     ],
     bloomVariety: [
       {value: 'auto flowering', label: 'Автоцветущия'},
-      {value: 'photo flowering', label: 'Фотоцветущия'}
-    ],
-    powerVariety: [
-      {value: 'strong', label: 'Сильная'},
-      {value: 'normal', label: 'Умеренная'},
-      {value: 'light', label: 'Слабая'},
-      {value: 'for newbies', label: 'Для новичков'},
+      {value: 'photo flowering', label: 'Фотоцветущия'},
+      {value: 'regular', label: 'Регуляр'},
     ],
     femVariety: [
       {value: 'autofeminized', label: 'Авто Феминизированные'},
@@ -646,7 +630,6 @@ export default {
           || !this.genetics
           || !this.harvestFilter
           || !this.bloom
-          || !this.power
           || !this.fem
           || !this.place
           || this.taste.length === 0
@@ -661,6 +644,18 @@ export default {
 
       setTimeout(() => this.alert.visible = false, 5000)
     },
+    filterPower() {
+      if (10 >= this.thc.from) {
+        return 'for newbies'
+      } else if (this.thc.from > 10 && this.thc.from <= 15) {
+        return 'light'
+      } else if (this.thc.from > 15 && this.thc.from <= 20) {
+        return 'normal'
+      } else if (this.thc.from > 20) {
+        return 'strong'
+      }
+    },
+
     filterHeight() {
       if (this.height >= 40 && this.height < 80) {
         return 'small'
@@ -700,7 +695,7 @@ export default {
           },
           bloom: this.bloom,
           thc: this.thc,
-          power: this.power,
+          power: this.filterPower(),
           fem: this.fem,
           place: this.place,
           taste: this.taste,

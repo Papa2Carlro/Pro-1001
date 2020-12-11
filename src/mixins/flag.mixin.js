@@ -1,6 +1,7 @@
-import { cifRu, cifUs } from '@coreui/icons'
+import { cifRu, cifUs, cifUa } from '@coreui/icons'
 
 export default {
   ru: cifRu,
-  en: cifUs
+  en: cifUs,
+  ua: cifUa
 }

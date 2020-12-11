@@ -13,6 +13,22 @@ export default [
         _class: 'm-1'
       },
       {
+        _name: 'CSidebarNavItem',
+        name: 'Заказы',
+        to: '/payment',
+        icon: 'cil-cursor',
+      },
+      {
+        _name: 'CSidebarNavItem',
+        name: 'Доставка',
+        to: '/shipping',
+        icon: 'cil-cursor',
+      },
+      {
+        _name: 'CSidebarNavDivider',
+        _class: 'm-1'
+      },
+      {
         _name: 'CSidebarNavDropdown',
         name: 'Товары',
         to: '/products',

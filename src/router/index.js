@@ -15,6 +15,8 @@ const Store = () => import('@/views/Store')
 const Faq = () => import('@/views/Faq')
 const Filters = () => import('@/views/Filters')
 const Mailer = () => import('@/views/Mailer')
+const ShippingSetting = () => import('@/views/Shipping')
+const PaymentSetting = () => import('@/views/Payment')
 
 // Views - Components
 const Cards = () => import('@/views/base/Cards')
@@ -89,6 +91,11 @@ function configRoutes () {
           component: Dashboard
         },
         {
+          path: 'payment',
+          name: 'Payment',
+          component: PaymentSetting
+        },
+        {
           path: 'coupons',
           name: 'Coupons',
           component: Coupons
@@ -97,6 +104,11 @@ function configRoutes () {
           path: 'stores',
           name: 'Store',
           component: Store
+        },
+        {
+          path: 'shipping',
+          name: 'Shipping',
+          component: ShippingSetting
         },
         {
           path: 'faqs',
@@ -229,6 +241,11 @@ function configRoutes () {
               component: User
             }
           ]
+        },
+        {
+          path: 'Charts',
+          name: 'charts',
+          component: Charts
         },
         {
           path: 'base',

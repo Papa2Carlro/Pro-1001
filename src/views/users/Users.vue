@@ -25,7 +25,7 @@
             <template #isAdmin="data">
               <td>
                 <CBadge>
-                  {{data.item.isAdmin ? 'Админ' : 'Пользователь'}}
+                  {{data.item.isAdmin ? 'Администратор' : 'Пользователь'}}
                 </CBadge>
               </td>
             </template>
@@ -45,7 +45,7 @@ export default {
     return {
       items: [],
       fields: [
-        { key: 'firstName', label: 'Имя', _classes: 'font-weight-bold' },
+        { key: 'nickname', label: 'Имя', _classes: 'font-weight-bold' },
         { key: 'email', label: 'Почта' },
         { key: 'phone', label: 'Телефон' },
         { key: 'isAdmin', label: 'Роль' },

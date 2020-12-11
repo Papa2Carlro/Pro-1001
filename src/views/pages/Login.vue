@@ -55,7 +55,7 @@ export default {
   name: 'Login',
   data: () => ({
     email: 'priymak615@gmail.com',
-    password: '9dce445b',
+    password: 'vfrcbc12',
 
     errorEmail: true,
     errorPassword: true,
@@ -86,7 +86,7 @@ export default {
                   token: res.data.token
                 }))
 
-                this.$router.push('/')
+                this.$router.push({name: 'dashboard'})
               }
             } else {
               if (res.data.msg.email) {

@@ -153,16 +153,6 @@
 
                 <CCol sm="6">
                   <CSelect
-                      label="Крепость"
-                      size="md"
-                      :value.sync="power"
-                      :options="powerVariety"
-                      placeholder="Выберете крепость"
-                  />
-                </CCol>
-
-                <CCol sm="6">
-                  <CSelect
                       label="Пол"
                       size="md"
                       :value.sync="fem"
@@ -512,7 +502,6 @@ export default {
     yieldStr: undefined,
     genetics: '',
     bloom: '',
-    power: '',
     fem: '',
     place: '',
     taste: [],
@@ -542,12 +531,6 @@ export default {
     bloomVariety: [
       {value: 'auto flowering', label: 'Автоцветущия'},
       {value: 'photo flowering', label: 'Фотоцветущия'}
-    ],
-    powerVariety: [
-      {value: 'strong', label: 'Сильная'},
-      {value: 'normal', label: 'Умеренная'},
-      {value: 'light', label: 'Слабая'},
-      {value: 'for newbies', label: 'Для новичков'},
     ],
     femVariety: [
       {value: 'autofeminized', label: 'Авто Феминизированные'},
@@ -637,7 +620,6 @@ export default {
             this.thc = dataGeneral.thc
             this.yieldStr = dataGeneral.yield
             this.genetics = dataGeneral.genetics
-            this.power = dataGeneral.power
             this.bloom = dataGeneral.bloom
             this.fem = dataGeneral.fem
             this.place = dataGeneral.place
@@ -645,11 +627,7 @@ export default {
             this.tasteVariety.map(filter => {
               const [item] = this.taste.filter(item => item === filter.value)
 
-              console.log(item)
-
-              if(item) {
-                filter.isActive = true
-              }
+              if(item) { filter.isActive = true }
             })
 
             this.effect = dataGeneral.effect
@@ -766,7 +744,6 @@ export default {
           || !this.genetics
           || !this.harvestFilter
           || !this.bloom
-          || !this.power
           || !this.fem
           || !this.place
           || this.taste.length === 0
@@ -788,6 +765,17 @@ export default {
         return 'medium'
       } else if (this.height.sm >= 160 && this.height.sm <= 220) {
         return 'big'
+      }
+    },
+    filterPower() {
+      if (10 >= this.thc.from) {
+        return 'for newbies'
+      } else if (this.thc.from > 10 && this.thc.from <= 15) {
+        return 'light'
+      } else if (this.thc.from > 15 && this.thc.from <= 20) {
+        return 'normal'
+      } else if (this.thc.from > 20) {
+        return 'strong'
       }
     },
 
@@ -820,7 +808,7 @@ export default {
           },
           bloom: this.bloom,
           thc: this.thc,
-          power: this.power,
+          power: this.filterPower(),
           fem: this.fem,
           place: this.place,
           taste: this.taste,
@@ -913,5 +901,12 @@ export default {
 .btn {
   display: flex;
   justify-content: flex-end;
+}
+.item:active {
+  background: transparent;
+}
+.isActive {
+  background: #321fdb !important;
+  color: #fff !important;
 }
 </style>

@@ -44,6 +44,7 @@
                 v-model="bonus"
                 type="number"
                 min="0"
+                step="0.01"
                 label="Бонус от рефералов"
                 horizontal
             />
@@ -116,7 +117,7 @@ export default {
             const user = res.data.body
 
             this.email = user.email
-            this.name = user.firstName
+            this.name = user.nickname
             this.city = user.city
             this.phone = user.phone
             this.bonus = user.bonus
@@ -138,7 +139,7 @@ export default {
       const data = JSON.parse(localStorage.getItem('login'))
 
       const formData = {
-        firstName: this.name,
+        nickname: this.name,
         city: this.city,
         phone: this.phone,
         role: this.role === 'Админ',
