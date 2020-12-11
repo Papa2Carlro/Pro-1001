@@ -24,7 +24,7 @@
           >
             <template #visible="data">
               <td>
-                {{ data.item.visible ? 'Видимо' : 'Не видимо' }}
+                {{ data.item.visible ? 'Видимо' : 'Скрыто' }}
               </td>
             </template>
             <template #price="data">

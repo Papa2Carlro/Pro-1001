@@ -9,7 +9,7 @@
           {{ alert.msg }}
         </CAlert>
 
-        <CForm @submit="createProductHandler">
+        <CForm @submit.prevent="createProductHandler">
           <CTabs>
             <CTab title="Основная информация" active>
               <CInput
