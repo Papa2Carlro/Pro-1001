@@ -110,25 +110,14 @@
                 <CCol sm="6">
                   <p class="mb-2">Терпены</p>
                   <CDropdown
-                      :show.sync="show"
                       togglerText="Выберете терпены"
                       color="light"
                   >
                     <CDropdownItem v-for="option in tasteVariety" @click="tasteHandler(option)" class="item" :key="option.value"
                                    :class="{isActive: option.isActive}">
-                        {{ option.label }}
+                      {{ option.label }}
                     </CDropdownItem>
                   </CDropdown>
-                </CCol>
-
-                <CCol sm="6">
-                  <CSelect
-                      label="Эффект"
-                      size="md"
-                      :value.sync="effect"
-                      :options="effectVariety"
-                      placeholder="Выберете эффект"
-                  />
                 </CCol>
 
                 <CCol sm="6">
@@ -139,6 +128,19 @@
                       :options="bloomVariety"
                       placeholder="Выберете тип цветения"
                   />
+                </CCol>
+
+                <CCol sm="6">
+                  <p class="mb-2">Эффекты</p>
+                  <CDropdown
+                      togglerText="Выберете эффекты"
+                      color="light"
+                  >
+                    <CDropdownItem v-for="option in effectVariety" @click="effectHandler(option)" class="item" :key="option.value"
+                                   :class="{isActive: option.isActive}">
+                      {{ option.label }}
+                    </CDropdownItem>
+                  </CDropdown>
                 </CCol>
 
                 <CCol sm="6">
@@ -430,7 +432,6 @@ export default {
       ru: "<h2>Как бороться с приступом хронической головной боли</h2><p>Мы живем во втором тысячелетии. Он предлагает новые удивительные возможности и проблемы: вы можете выращивать собственный урожай, используя семена из Нидерландов. Есть клуб преданных садоводов.</p><p>Его участники - друзья, которые обмениваются семенами и опытом. Также они вместе ездят в поездки. Однажды они решили основать компанию и распространять радость от каннабиса.</p>",
       en: "<h2>How to deal with pain from a chronic headache attack</h2><p>We live in the second millennium. It offers amazing new possibilities and challenges: you can grow your own crop using seeds from the Netherlands. There is a club of dedicated gardeners.</p><p>Its members are friends who share seeds and experiences. They also travel together. One day they decided to start a company and spread the joy of cannabis.</p>"
     },
-    show: false,
 
     name: 'Auto Russian Rocket Fuel',
     price: {
@@ -466,7 +467,7 @@ export default {
     fem: '',
     place: '',
     taste: [],
-    effect: '',
+    effect: [],
     height: {
       from: 60,
       to: 120
@@ -541,7 +542,7 @@ export default {
         .then(res => {
           if (res.data.ok) {
             this.effectVariety = res.data.body.map(item => {
-              return {value: item.filterId, label: item.name.ru}
+              return {value: item.filterId, label: item.name.ru, isActive: false}
             })
           }
         })
@@ -557,10 +558,8 @@ export default {
   },
   methods: {
     async tasteHandler(taste) {
-      this.show = true
       await this.tasteVariety.map(item => {
         if (item.value === taste.value) {
-          this.show = true
           if (item.isActive) {
             item.isActive = false
             this.taste = this.taste.filter(filter => filter !== item.value)
@@ -570,9 +569,21 @@ export default {
           }
         }
       })
-
-      this.show = true
     },
+    async effectHandler(effect) {
+      await this.effectVariety.map(item => {
+        if (item.value === effect.value) {
+          if (item.isActive) {
+            item.isActive = false
+            this.effect = this.effect.filter(filter => filter !== item.value)
+          } else {
+            item.isActive = true
+            this.effect.push(item.value)
+          }
+        }
+      })
+    },
+
     async uploadMainPhotoHandler(event) {
       let formData = new FormData();
       formData.append('image', event[0]);

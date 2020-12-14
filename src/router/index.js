@@ -16,7 +16,8 @@ const Faq = () => import('@/views/Faq')
 const Filters = () => import('@/views/Filters')
 const Mailer = () => import('@/views/Mailer')
 const ShippingSetting = () => import('@/views/Shipping')
-const PaymentSetting = () => import('@/views/Payment')
+const Payments = () => import('@/views/payment/Payments')
+const PaymentsItem = () => import('@/views/payment/Payment')
 
 // Views - Components
 const Cards = () => import('@/views/base/Cards')
@@ -91,11 +92,6 @@ function configRoutes () {
           component: Dashboard
         },
         {
-          path: 'payment',
-          name: 'Payment',
-          component: PaymentSetting
-        },
-        {
           path: 'coupons',
           name: 'Coupons',
           component: Coupons
@@ -129,6 +125,27 @@ function configRoutes () {
           path: 'filters',
           name: 'Filters',
           component: Filters
+        },
+        {
+          path: 'payment',
+          name: 'Payment',
+          component: {
+            render(c) {
+              return c('router-view')
+            }
+          },
+          children: [
+            {
+              path: '',
+              name: 'Payment Catalog',
+              component: Payments
+            },
+            {
+              path: ':id',
+              name: 'Payment Item',
+              component: PaymentsItem
+            },
+          ]
         },
         {
           path: 'posts',

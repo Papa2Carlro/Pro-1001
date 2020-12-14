@@ -120,7 +120,6 @@
                 <CCol sm="6">
                   <p class="mb-2">Терпены</p>
                   <CDropdown
-                      :show.sync="show"
                       togglerText="Выберете терпены"
                       color="light"
                   >
@@ -133,22 +132,25 @@
 
                 <CCol sm="6">
                   <CSelect
-                      label="Эффект"
-                      size="md"
-                      :value.sync="effect"
-                      :options="effectVariety"
-                      placeholder="Выберете эффект"
-                  />
-                </CCol>
-
-                <CCol sm="6">
-                  <CSelect
                       label="Тип цветения"
                       size="md"
                       :value.sync="bloom"
                       :options="bloomVariety"
                       placeholder="Выберете тип цветения"
                   />
+                </CCol>
+
+                <CCol sm="6">
+                  <p class="mb-2">Эффекты</p>
+                  <CDropdown
+                      togglerText="Выберете эффекты"
+                      color="light"
+                  >
+                    <CDropdownItem v-for="option in effectVariety" @click="effectHandler(option)" class="item" :key="option.value"
+                                   :class="{isActive: option.isActive}">
+                      {{ option.label }}
+                    </CDropdownItem>
+                  </CDropdown>
                 </CCol>
 
                 <CCol sm="6">
@@ -447,7 +449,7 @@
             <CCol class="btn mt-3">
               <CButton type="submit" size="md" color="success">Сохранить</CButton>
               <CButton @click="removeProductHandler" size="md" class="ml-2" color="danger">Удалить</CButton>
-              <CButton v-if="visible" @click="disableProductHandler(false)" size="md" class="ml-2" color="info">Спратать</CButton>
+              <CButton v-if="visible" @click="disableProductHandler(false)" size="md" class="ml-2" color="info">Спрятать</CButton>
               <CButton @click="$router.go(-1)" size="md" class="ml-4" color="dark">Отменить</CButton>
             </CCol>
           </CRow>
@@ -483,7 +485,6 @@ export default {
     vertical: {navs: 'col-md-1', content: 'col-md-11'},
     editor: ClassicEditor,
     editorData: {},
-    show: false,
 
     fields,
     details: [],
@@ -579,7 +580,7 @@ export default {
         .then(res => {
           if (res.data.ok) {
             this.effectVariety = res.data.body.map(item => {
-              return {value: item.filterId, label: item.name.ru}
+              return {value: item.filterId, label: item.name.ru, isActive: false}
             })
           }
         })
@@ -633,6 +634,12 @@ export default {
             })
 
             this.effect = dataGeneral.effect
+            this.effectVariety.map(filter => {
+              const [item] = this.effect.filter(item => item === filter.value)
+
+              if(item) { filter.isActive = true }
+            })
+
             this.height.from = dataGeneral.height.sm.includes('-') ? dataGeneral.height.sm.split('-')[0] : dataGeneral.height.sm
             this.height.to = dataGeneral.height.sm.includes('-') ? dataGeneral.height.sm.split('-')[1] : ''
             this.harvestFilter = dataGeneral.harvest.filter
@@ -656,10 +663,8 @@ export default {
   },
   methods: {
     async tasteHandler(taste) {
-      this.show = true
       await this.tasteVariety.map(item => {
         if (item.value === taste.value) {
-          this.show = true
           if (item.isActive) {
             item.isActive = false
             this.taste = this.taste.filter(filter => filter !== item.value)
@@ -669,9 +674,21 @@ export default {
           }
         }
       })
-
-      this.show = true
     },
+    async effectHandler(effect) {
+      await this.effectVariety.map(item => {
+        if (item.value === effect.value) {
+          if (item.isActive) {
+            item.isActive = false
+            this.effect = this.effect.filter(filter => filter !== item.value)
+          } else {
+            item.isActive = true
+            this.effect.push(item.value)
+          }
+        }
+      })
+    },
+
     disableProductHandler (bool) {
       const data = JSON.parse(localStorage.getItem('login'))
 

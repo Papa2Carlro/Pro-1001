@@ -62,7 +62,7 @@ export default {
   }),
   async created() {
     await this.getData()
-    await setInterval(this.getData, 60000)
+    await setInterval(this.getData, 20000)
   },
   methods: {
     logout() {
